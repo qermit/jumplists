@@ -1,2 +1,2 @@
-from .jumplist import JumpList
+from .jumplist import JumpList, JumpListCustomCategory
 from .jumplistitem import JumpListItemLink, JumpListItemSeparator

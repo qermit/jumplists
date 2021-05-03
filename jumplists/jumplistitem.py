@@ -5,6 +5,13 @@ from win32com.shell import shell
 from win32com.propsys import propsys, pscon
 import pythoncom
 
+
+def cmd_escape(x: str):
+    # return x.replace('\\', '\\\\').replace('"', '\\"').replace(' ', '\\ ')
+    # return x.replace('"', '\\"').replace(' ', '\\ ')
+    return '"'+x.replace('"', '\\"')+'"'
+
+
 class JumpListItemType(Enum):
     UNKNOWN = 0
     LINK = 1
@@ -32,6 +39,15 @@ class JumpListItemLink(AbstractJumpListItem):
         self.command_args = command_args
         self.icon = icon
         self.icon_index = icon_index
+        self._working_directory = None
+
+    @property
+    def working_directory(self):
+        return self._working_directory
+
+    @working_directory.setter
+    def working_directory(self, path):
+        self._working_directory = path
 
     def get_link(self):
         link = pythoncom.CoCreateInstance(
@@ -39,7 +55,11 @@ class JumpListItemLink(AbstractJumpListItem):
 
         link.SetPath(self.command)
         if self.command_args:
-            link.SetArguments(shlex.join(self.command_args))
+            args = ' '.join(map(cmd_escape, self.command_args))
+            link.SetArguments(args)
+
+        if self._working_directory:
+            link.SetWorkingDirectory(self._working_directory)
 
         if self.icon:
             link.SetIconLocation(self.icon, self.icon_index)
